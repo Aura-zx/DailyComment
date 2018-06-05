@@ -50,9 +50,10 @@ block formatting 规则比较简单，如图它遵循这样一些规则
 
 #### inline formatting
 
-inline formatting 就比较复杂了，因为它涉及到将内容分割成line box(将那些在一行的boxes的长方形区域称为`line box`)，正常来说inline的元素时在一行中平行布局，当一行放不下时，会进行垂直布局，此时是以line box为单位垂直布局。
+inline formatting 就比较复杂了，因为它涉及到将内容分割成line box(将那些在一行的boxes的长方形区域称为`line box`)，正常来说inline的元素时在一行中平行布局，当一行放不下时(这里的行宽度由它的父元素决定)会进行垂直布局，此时是以line box为单位垂直布局。
 
-inline box的另一个特点是给它设置`width`、`height`这些属性时会被忽略，当通过设置`position:absolute`使它成为block时才会使这些属性生效。
-TODO:当被container有width时，[inline的布局](https://codepen.io/aura-zx/pen/eKJXQQ)。
+inline box的另一个特点是给它设置`width`、`height`这些属性时会被忽略，通常情况下inline元素的宽度由它的父元素决定。当通过设置`position:absolute`使它成为block时才会使这些属性生效。inline box的高度可以由`line-height`控制，以绝对高度或者相对高度的形式，绝对高度就是一个固定的值，或者以倍数于当前元素设置的字体尺寸来决定，可大可小，默认情况下根据字体的尺寸来决定行高。
 
-另外，`display:inline`和`display:inline-box`的区别可以见[这个问题](https://stackoverflow.com/questions/8969381/what-is-the-difference-between-display-inline-and-display-inline-block)。
+当container有width时，[inline的布局](https://codepen.io/aura-zx/pen/eKJXQQ)像是block元素，实际上只是因为width太小，导致每一个inline元素变成了上一段说的line box。
+
+最后，`display:inline`和`display:inline-box`的区别可以见[这个问题](https://stackoverflow.com/questions/8969381/what-is-the-difference-between-display-inline-and-display-inline-block)。

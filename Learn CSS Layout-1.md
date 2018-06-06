@@ -42,11 +42,11 @@ block formatting 规则比较简单，如图它遵循这样一些规则
 
 ![block box](./imgs/LCL-1/block-box.png)
 
-- 每个block box在父容器的左外边缘
+- 每个block box在父盒子的左外边缘
 - float不会影响左外边缘的位置，但会影响文字的位置
-- 没有设置宽度的block box会填充满整个父容器的宽度
+- 没有设置宽度的block box会填充满整个父盒子的宽度
 - 设置了宽度的会从左边开始计算
-- 宽度即使没有充满父容器，block box也不会同一行
+- 宽度即使没有充满父盒子，block box也不会同一行
 
 #### inline formatting
 
@@ -54,9 +54,12 @@ inline formatting 就比较复杂了，因为它涉及到将内容分割成line 
 
 inline box的另一个特点是给它设置`width`、`height`这些属性时会被忽略，通常情况下inline元素的宽度由它的父元素决定。当通过设置`position:absolute`使它成为block时才会使这些属性生效。
 
-对于line box，它的高度可以由`line-height`控制，以绝对高度或者相对高度的形式，绝对高度就是一个固定的值，或者以倍数于当前元素设置的`字体尺寸`来决定，可大可小，默认情况下根据字体的尺寸来决定行高。line box的高度是在计算所有inline box之后进行的，然后设置除过`vertical-align:top/bottom`，之外的其它vertical-align属性。[例子](https://codepen.io/aura-zx/pen/zaqyaY)。
+对于line box，它的高度可以由`line-height`控制，以绝对高度或者相对高度的形式，绝对高度就是一个固定的值，或者以倍数于当前元素设置的`字体尺寸`来决定，可大可小，默认情况下根据字体的尺寸来决定行高。line box的高度是在计算所有inline box之后进行的，然后设置除过`vertical-align:top/bottom`之外的其它vertical-align属性。[例子](https://codepen.io/aura-zx/pen/zaqyaY)。
 
 当container有width时，[inline的布局](https://codepen.io/aura-zx/pen/eKJXQQ)像是block元素，实际上只是因为width太小，导致每一个inline元素变成了上一段说的line box。
+
+##### vertical-align属性
+[直观了解vertical-align在和谁对齐](https://css-tricks.com/what-is-vertical-align/)
 
 垂直居中是一个常见的需求，[这个例子](https://codepen.io/aura-zx/pen/MXyLoa)通过将需要垂直居中的元素设为`display:inline-box`，`vertical-align:middle`解决了水平方向居中的问题，配合一个container后面的样式为`height:100%`的伪元素将line box的高度和container一致，这样该元素就可以和这个伪元素对齐，解决了垂直方向居中的问题。
 
@@ -66,7 +69,13 @@ inline box的另一个特点是给它设置`width`、`height`这些属性时会�
 有几种办法可以解决:
 
 - 手动去掉那个空格，但这样做会影响代码可读性
-- 将父容器的`font-size:0`，再单独给两个子元素设置`font-size`，这可以使那个空格不再占用任何空间
-- 父容器设置`white-space: nowrap`，虽然两个子元素在一行了，但是空格依旧存在
+- 将父盒子的`font-size:0`，再单独给两个子元素设置`font-size`，这可以使那个空格不再占用任何空间
+- 父盒子设置`white-space: nowrap`，虽然两个子元素在一行了，但是空格依旧存在
 - CSS3的`text-space-collapse`属性，缺点是目前许多浏览器暂不支持
 
+##### 不那么直观的vertical-align:middle
+
+middle的值不像baseline、top、bottom那么直观，由定义它是将盒子(子盒子,一般是inline)的垂直中点和`父盒子的baseline`+`x-height`的一半对齐。
+
+- `父盒子的baseline`:
+- `x-height`:

@@ -80,3 +80,10 @@ middle的值不像baseline、top、bottom那么直观，由定义它是将盒子
 - `父盒子的baseline`:这里的父盒子不是指包含它的container，而是它所在的line box。[这个例子](https://codepen.io/aura-zx/pen/xzOpqv)，可以看到parent是有固定高度60px的，但是"<"却没有那么高
 - `x-height`:就是指'x'字符的高度，[这个例子](https://codepen.io/aura-zx/pen/PaGpZN)表明line box的高度也不影响布局。
 
+#### Normal flow: relative positioning
+
+`position:relative`依旧算在文档流中，然后根据`top/left/bottom/right`等属性进行位置的offset。
+
+[这个例子](https://codepen.io/aura-zx/pen/aKmMbJ)可以看出，4个div区域，没有任何样式的情况下是每个div垂直布局的，第一个div增加float之后跳出文档流；第二个div加了10px的padding-top，增加了自己的高度；第三个div将position设置为relative，然后向上移动了20px，向右移动了10px，width成为原来的30%，这里注意，向上移动是通过`-20px`完成的，而向右移动又是通过`10px`完成的，两个方向的正负数值代表的含义并不相同；第四个div只减少了宽度，但是它的位置并没有随着第三个div位置的变化而变化。
+
+##### float position scheme

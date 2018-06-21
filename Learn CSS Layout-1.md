@@ -87,3 +87,13 @@ middle的值不像baseline、top、bottom那么直观，由定义它是将盒子
 [这个例子](https://codepen.io/aura-zx/pen/aKmMbJ)可以看出，4个div区域，没有任何样式的情况下是每个div垂直布局的，第一个div增加float之后跳出文档流；第二个div加了10px的padding-top，增加了自己的高度；第三个div将position设置为relative，然后向上移动了20px，向右移动了10px，width成为原来的30%，这里注意，向上移动是通过`-20px`完成的，而向右移动又是通过`10px`完成的，两个方向的正负数值代表的含义并不相同；第四个div只减少了宽度，但是它的位置并没有随着第三个div位置的变化而变化。
 
 ##### float position scheme
+
+float布局本意是将文字环绕在图片周围，但现在已经成为CSS里grid布局的基础。
+
+float将块级元素从布局的文档流中取出来，这不会影响那些块级盒子但是会影响line boxes。标准的描述说“float是一个在当前行上向左或向右移动的盒子，最有趣的特性是内容可以沿着一侧流动(flow along its side)。”
+
+float有这些特殊的行为：
+
+- float跳出文档流，因此它不会影响块级元素的垂直布局
+- float和容器的左或者右外边缘对齐
+- float从左边或者右边堆叠，当有两个right-float元素时，第一个在容器的右外边缘，第二个在第一个的左边

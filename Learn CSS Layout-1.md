@@ -90,10 +90,27 @@ middle的值不像baseline、top、bottom那么直观，由定义它是将盒子
 
 float布局本意是将文字环绕在图片周围，但现在已经成为CSS里grid布局的基础。
 
-float将块级元素从布局的文档流中取出来，这不会影响那些块级盒子但是会影响line boxes。标准的描述说“float是一个在当前行上向左或向右移动的盒子，最有趣的特性是内容可以沿着一侧流动(flow along its side)。”
+float将块级元素从布局的文档流中取出来，这不会影响那些块级盒子但是会影响line boxes。标准的描述说"float是一个在当前行上向左或向右移动的盒子，最有趣的特性是内容可以沿着一侧流动(flow along its side)。"
 
 float有这些特殊的行为：
 
-- float跳出文档流，因此它不会影响块级元素的垂直布局
-- float和容器的左或者右外边缘对齐
-- float从左边或者右边堆叠，当有两个right-float元素时，第一个在容器的右外边缘，第二个在第一个的左边
+- float 跳出文档流，因此它不会影响块级元素的垂直布局
+- float 和容器的左或者右外边缘对齐
+- float 从左边或者右边堆叠，当有两个right-float元素时，第一个在容器的右外边缘，第二个在第一个的左边
+- float 会影响当前和随后的inline元素，所有当前和随后的line boxes都需要缩短以给float留出空间
+- float 不在文档流中，所以它通常不会影响父元素的高度，这也是为什么开发"clearfix"技术的原因之一
+- float 可以使用clear属性清除
+
+下面逐条解释这些特性：
+
+[caes 1](https://codepen.io/aura-zx/pen/oyPNRL)
+
+浮动的框向左或向右移动，直到它的外边缘接触父容器的的边缘或者另一个浮动框。如果存在line box则浮动框的顶部与当前line box的顶部对齐。以左浮动为例，如果在一个左浮动盒子生成时**已经**有其他的左浮动盒子存在，对每一个生成的左浮动盒子来说要么它的`左边框在已生成的盒子的右边框右边`，要么`top属性小于已生成盒子的bottom`，右浮动同理。
+
+[caes 2](https://codepen.io/aura-zx/pen/gKdbbo)
+
+如果水平空间不够，float会向下移动直到空间足够或者没有更多的float出现。因为float不在文档流中，所以浮动框之前或之后创建的未定位框垂直流动，就像浮动不存在。例子里就是三个div区域正常垂直布局。但是当前和随后的line box就需要缩短宽度为float留出区域，例子中就是绿色和橙色div区域中的文本组成的line box移动了float区域中文本的宽度以便为它留出空间。
+
+[case 3](https://codepen.io/aura-zx/pen/RJYNoj)
+
+float不会影响文档流中用于建立新块级上下文元素内的line box，对应例子中绿色区域的文本组成的line box，这些元素要么放在float的侧面或者任何前面float的下面。

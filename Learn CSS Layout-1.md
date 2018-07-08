@@ -2,6 +2,18 @@
 
 主要跟着这本书学习[Learn CSS Layout](http://book.mixu.net/css/)
 
+- [1 Box positioning in CSS](#1-box-positioning-in-css)
+    - [Positioning Scheme](#positioning-scheme)
+    - [Anonymous box generation](#anonymous-box-generation)
+    - [Normal flow positioning](#normal-flow-positioning)
+        - [block formatting](#block-formatting)
+        - [inline formatting](#inline-formatting)
+            - [vertical-align属性](#vertical-align%E5%B1%9E%E6%80%A7)
+            - [不那么直观的vertical-align:middle](#%E4%B8%8D%E9%82%A3%E4%B9%88%E7%9B%B4%E8%A7%82%E7%9A%84vertical-alignmiddle)
+        - [Normal flow: relative positioning](#normal-flow-relative-positioning)
+            - [float position scheme](#float-position-scheme)
+    - [Absolute / fixed positioning scheme](#absolute--fixed-positioning-scheme)
+
 ## 1 Box positioning in CSS
 
 CSS布局的核心就是把HTML的元素映射一些`rectangular boxes`，这些盒子又分布在x、y、z三个轴上，x,y方向上的位置是由`positioning scheme`定义的，在CSS 2.1中定义了三种：`normal flow`，`floats`，`absolute positioning`。
@@ -114,3 +126,29 @@ float有这些特殊的行为：
 [case 3](https://codepen.io/aura-zx/pen/RJYNoj)
 
 float不会影响文档流中用于建立新块级上下文元素内的line box，对应例子中绿色区域的文本组成的line box，这些元素要么放在float的侧面或者任何前面float的下面。
+
+[case 4](https://codepen.io/aura-zx/pen/aKeaLN)
+
+`clear`属性比较好理解，就是去除左边或右边的浮动元素，默认不去除，橙色区域清除了左边的浮动元素，无色区域去除了两边的浮动元素。
+
+[case 5](https://codepen.io/aura-zx/pen/OEKovo)
+
+float的另一个需要关注的特性是父元素高度的计算不考虑浮动元素，也就是说当父容器只有float元素时，它的高度为0。原因是在计算块级元素高度时需要考虑一个属性`overflow`，它的默认值为`visible`，这种情况下不考虑float元素，当你将他设置为其它值时就会将那些float元素计算在内了。
+
+[case 6](https://codepen.io/aura-zx/pen/JZgaaW)
+
+`claerfix`技术是对基本浮动清除的增强，case 6想把将三组float元素塞进他们对应的父容器中，以目前的知识有三种做法：
+
+- 在父元素的两个float元素之后增加一个`clear:both`的元素，也就是例子中的.hide。
+- 在父元素后增加一个具有`clear:both`的伪元素，也就是例子中的.clearfix:after。
+- 改变父元素的`overflow`属性的值
+
+这三个方法一般使用后两个方法，这其中又比较推荐伪元素方法，[这个例子](https://codepen.io/aura-zx/pen/XYvPwj)体现了伪元素方法的优势，如果是修改`overflow`属性值，会将溢出内容可滚动而不是可见。
+
+### Absolute / fixed positioning scheme
+
+Absolute / fixed 定位是比较简单直观的一种模式，boxes相对于它的父容器以绝对偏移量定位。文档流计算定位的时候会忽略绝对定位，同时绝对定位也不与它的兄弟元素交互，绝对定位元素中的float元素只与绝对定位元素中的其它元素交互。这两种定位模式都与`width`，`height`，`top`，`left`，`bottom`，`right`属性有关系，如果这些属性都明确定义了，计算结果是非常直观的，但只是部分指定，计算过程就复杂很多。
+
+- fix定位与viewport有关
+- absolute定位与父元素有关
+

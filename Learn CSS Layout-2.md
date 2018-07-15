@@ -39,3 +39,17 @@ blocks, floats, inline-blocks在属性`height:auto`的情况下有相同的计�
 >  if the element has any floating descendants whose bottom margin edge is below the element's bottom content edge, then the height is increased to include those edges. Only floats that participate in this block formatting context are taken into account, e.g., floats inside absolutely positioned descendants or other floats are not.
 
 也就是说，当`width`和`height`为auto时，blocks会一直扩展，直到完全包裹content，但对于float元素，仅是那些参与block formatting context的参与计算，比如absolute定位的元素就不参与。
+
+### Width calculation
+
+宽度的计算要更复杂些，针对`width`和`margin`值都为auto的情况有两种算法。
+
+Block-level元素使用`constraint-based`的方法，所谓的限制也就是盒模型（比如`border`，`padding`，`margin`等属性），如果`width`或者`margin`其中有一个的值设置为auto，则这个auto的计算是通过可使用的空间减去那些已经设定好有具体值的属性得到的值作为auto最终渲染时使用的结果。
+
+Floating block和inline-block元素使用`shrink-to-fit`的方法，它包括三个步骤，1)首选宽度（例如，尽可能少的换行符），2)首选最小可用宽度（例如，使用尽可能多的换行符），3)可用的宽度。
+
+如果水平空间可用，则宽度值设置为`首选宽度`，否则设置为`首选最小宽度`，最坏的情况下，可用宽度可能存在一些潜在的溢出。对于floating block和inline-block元素，`margin:auto`会被解读为`margin:0`。
+
+#### Width calculations: block-level elements(constraint-based)
+
+#### Width calculations: floating blocks and inline-block elements(shrink-to-fit)

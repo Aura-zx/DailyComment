@@ -52,4 +52,22 @@ Floating block和inline-block元素使用`shrink-to-fit`的方法，它包括三
 
 #### Width calculations: block-level elements(constraint-based)
 
+标准
+> 'margin-left' + 'border-left-width' + 'padding-left' + 'width' + 'padding-right' + 'border-right-width' + 'margin-right' = width of containing block
+
+这其中`border`，`padding`的属性不能设置为auto，它们必定有一个确定的值，上面的式子可以化简为
+
+> margin-left + width + margin-right = width of containing block
+
+当显式的设置这三个属性的值时，可以直接使用这个计算结果。当发生以下三种情况时，使用constraint-based方法
+
+- `width`是auto且`margins`是auto
+- `width`是具体的值且`margins`是auto
+- 三个值中有两个是具体的值，另一个是auto
+
+[case1](https://codepen.io/aura-zx/pen/RBarbJ)
+
+当`width`设置为auto时，其它设置为auto的属性变为`0`，在case 1中box的width为整个行的宽，包括了所有padding和border需要的空间。
+
+[case2]()
 #### Width calculations: floating blocks and inline-block elements(shrink-to-fit)

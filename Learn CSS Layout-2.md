@@ -69,5 +69,24 @@ Floating block和inline-block元素使用`shrink-to-fit`的方法，它包括三
 
 当`width`设置为auto时，其它设置为auto的属性变为`0`，在case 1中box的width为整个行的宽，包括了所有padding和border需要的空间。
 
-[case2]()
+[case2](https://codepen.io/aura-zx/pen/xJOwjw)
+
+当`width`有具体的值，`margin`为auto时，将box居中。这里隐含的计算是，当`margin-left`和`margin-right`都为auto时，他们的值相等，所以就将box居中了。当然只是水平居中，因为block formatting context 将box从上至下顺序排布，所以不能垂直居中。
+
+[case3](https://codepen.io/aura-zx/pen/wxWMKR)
+
+当三个值中有两个是具体值时，剩下的那个值等于可用宽度减去那两个特定值。
+
 #### Width calculations: floating blocks and inline-block elements(shrink-to-fit)
+
+在了解`shrink-to-fit`算法之前首先了解几个概念：
+
+1. `perferred width(pw)`使换行符最少的宽度
+2. `perferred minimum width(pmw)`使换行符尽可能多的宽度，CSS 2.1并没有指定计算这个宽度的算法
+3. `available width(aw)`父元素的宽度减去水平方向margin，border，padding的值以及可能存在的滚动条的宽度
+
+shrink-to-fit算法就可以描述为min(max(pmw, aw),pw)。
+
+[case1](https://codepen.io/aura-zx/pen/QBEype)
+
+perferred width值作为宽度的例子。

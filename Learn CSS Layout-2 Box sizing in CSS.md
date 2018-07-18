@@ -2,6 +2,16 @@
 
 ## Box sizing in CSS
 
+- [Box sizing in CSS](#box-sizing-in-css)
+    - [Content dimensions and margins](#content-dimensions-and-margins)
+    - [Box model calculations for inline elements](#box-model-calculations-for-inline-elements)
+    - ["Content-based" height for blocks, floats and inline-blocks](#%22content-based%22-height-for-blocks-floats-and-inline-blocks)
+    - [Width calculation](#width-calculation)
+        - [Width calculations: block-level elements(constraint-based)](#width-calculations-block-level-elementsconstraint-based)
+        - [Width calculations: floating blocks and inline-block elements(shrink-to-fit)](#width-calculations-floating-blocks-and-inline-block-elementsshrink-to-fit)
+    - [Margins for floating blocks and inline-block elements](#margins-for-floating-blocks-and-inline-block-elements)
+        - [Absolutely positioned, non-replaced elements](#absolutely-positioned-non-replaced-elements)
+
 CSS box的计算依赖于box model，每一个box都有一个content区域以及`可选`的围绕着content区域的padding，border和margin三个部分，如图所示。
 
 ![box model](./imgs/LCL-2/box-model.png)

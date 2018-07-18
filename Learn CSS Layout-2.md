@@ -90,3 +90,38 @@ shrink-to-fit算法就可以描述为min(max(pmw, aw),pw)。
 [case1](https://codepen.io/aura-zx/pen/QBEype)
 
 perferred width值作为宽度的例子。
+
+[case2](https://codepen.io/aura-zx/pen/vaXNVg)
+
+当available width小于preferred width，但是大于等于preferred minimum width，使用available width作为宽度的例子。
+
+[case3](https://codepen.io/aura-zx/pen/bjwVZM)
+
+当available width小于preferred minimum width，使用available width作为宽度的但是会有溢出的例子。
+
+### Margins for floating blocks and inline-block elements
+
+floating blocks和inline-block元素的margin计算十分简单，任何被设置为`auto`的magrin都将置为0。
+
+#### Absolutely positioned, non-replaced elements
+
+absolutely positioned元素将constraint-based，shrink-to-fit和content-based三种算法结合在一起来定位水平和垂直位置。
+
+高度的计算：
+
+> 'top' + 'margin-top' + 'border-top-width' + 'padding-top' + 'height' + 'padding-bottom' + 'border-bottom-width' +
+'margin-bottom' + 'bottom'
+= height of containing block
+
+宽度的计算：
+
+> 'left' + 'margin-left' + 'border-left-width' + 'padding-left' +
+'width' + 'padding-right' + 'border-right-width' + 'margin-right' +
+'right'
+= width of containing block
+
+同样，我们可以忽略padding和borders，因为他们不能被设置为auto，值要么为0，要么为一个特定的值。所以上面的可以简化为
+
+height = 'top' + 'margin-top' + 'height' + 'margin-bottom' + 'bottom'
+
+width = 'left' + 'margin-left' + 'width' + 'margin-right' + 'right'

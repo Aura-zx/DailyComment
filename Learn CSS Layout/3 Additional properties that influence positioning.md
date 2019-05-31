@@ -5,7 +5,7 @@
 - `Overflow`.当容器框内的内容大于其父级或位于父级框之外的偏移量时，它就溢出了，这个属性控制这种情况下的表现
 - `max-width, max-height, min-width, min-height`，`width`和`height`可以更进一步的通过这四个属性控制
 - `Pseudo-elements`伪元素可以伴随选中的CSS元素生成，它生成的额外的内容通常用来布局或者提供额外的视觉表现
-- `stacking contexts and rendering order`定义盒子的z轴渲染
+- `stacking contexts and rendering order`堆叠上下文和渲染顺序
 
 ## 1 Margin collapsing
 
@@ -164,3 +164,80 @@ Overflow发生在当子元素被定位在它的父元素之外或者子元素不
 >
 > `:before`和`:after`伪元素和其他boxes交互的时候，就好像是在关联元素内部插入的真实元素一样
 
+## 6 box-sizing (CSS3)
+
+在默认情况下，CSS 盒子的屏幕宽度是通过向相关的宽度或高度值添加`padding`或`border`来计算的。但是，这就使得指定布局更加困难，因为对填充和边框的更改会影响元素占用的空间量。
+
+CSS 3 添加了`box-sizing`属性，它可以帮助你决定是否将`padding`和`border`计算在`width`和`height`之内。
+
+`box-sizing`接受下面三个值，其中`padding-box`仅在Firefox浏览器中支持：
+
+- `content-box`：这是 CSS 2.1中的指定的宽度和高度行为。`padding`和`border`在指定的宽度和高度之外绘制。
+- `padding-box`：此元素的宽度和高度（以及相应的最小/最大属性）的长度和百分比值确定元素的填充框。也就是说，在元素上指定的任何填充都是在指定的宽度和高度内布局和绘制的。通过从指定的宽度和高度属性中减去各边的填充宽度来计算内容宽度和高度。
+- `border-box`：此元素的宽度和高度（以及相应的最小/最大属性）的长度和百分比值确定元素的边框。也就是说，元素上指定的任何填充或边框都布局并在此指定的宽度和高度内绘制。通过从指定的宽度和高度属性中减去各边的边框和填充宽度来计算内容宽度和高度。
+
+举个例子，如果一个box有`400px`的`width`、`10px`的`border`以及`10px`的`padding`，那么在
+
+- `content-box`中盒子的`width`是`440px`
+- `border-box`中盒子的`width`是`400px`
+
+## 7 Stacking and rendering order
+
+本节讨论在z轴上是如何定位的：
+
+- 首先每个box都包括一些渲染的部分，例如盒子的背景，边框和内容。它们都有固定的渲染顺序。
+- 其次，有一些元素，例如`float`和`absolute`定位的元素，可以被定位在其他已经生成的盒子之上，这种相对其他元素的渲染顺序由`z-index`属性决定。
+
+### Rendering order
+
+首先来看看在 CSS 中组成一个单独的盒子的各个部分。5个属性会导致各种视觉效果作为框的一部分绘制：`box-shadow`,`background-color`,`background-image`,`border`,`outline`。
+
+它们的相对渲染顺序是固定的：
+
+- 外层box的阴影
+- 元素的background-color
+- 元素的background-image
+- 内层box的阴影
+- 元素的border
+- 元素的内容
+- 元素的轮廓
+
+### Stacking context and z-index
+
+CSS中元素的z轴定位由它们的类型(float,box,inline,absolute)和它们相对于当前堆叠上下文的`z-index`确定。
+
+暂时忽略堆叠上下文，元素按以下顺序绘制：
+
+- 正常流程中的块级后代
+- 浮动元素
+- 正常流程中的内联级后代
+- 已定位的元素
+
+也就是说，`float`元素会在块级后代的上方，已定位的元素会在内联级后代的上方。
+
+堆叠上下文相比较格式化上下文很少提到。堆叠上下文是由具有特定属性集的一些元素形成的上下文。相同堆叠上下文中元素的`z-index`影响它们相对于同一个堆叠上下文中的其他元素的呈现顺序。
+
+标准对于如何形成堆叠上下文比较模糊，但是[MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Positioning/Understanding_z_index/The_stacking_context)中如下描述：
+
+> A stacking context is formed, anywhere in the document, by any element which is either
+>
+> - the root element (HTML),
+> - positioned (absolutely or relatively) with a z-index value other than "auto",
+> - a flex item with a z-index value other than "auto",
+> - elements with an opacity value less than 1. (See the specification for opacity),
+> - elements with a transform value other than "none",
+> - elements with a mix-blend-mode value other than "normal",
+> - elements with isolation set to "isolate",
+> - on mobile WebKit and Chrome 22+, position: fixed always creates a new stacking context, even when z-index is "auto" (See this post)
+> - specifying any attribute above in will-change even if you don't specify values for these attributes directly (See this post)
+> - elements with -webkit-overflow-scrolling set to "touch"
+
+换句话说，堆叠上下文更少见，因为大多数元素并不形成新的堆叠上下文。
+
+> - Each box belongs to one stacking context.
+> - Each positioned box in a given stacking context has an integer stack level, which is its position on the z-axis relative other stack levels within the same stacking context.
+> - Boxes with greater stack levels are always formatted in front of boxes with lower stack levels.
+> - Boxes may have negative stack levels.
+> - Boxes with the same stack level in a stacking context are stacked back-to-front according to document tree order.
+
+只有定位的元素可以具有z-index，例如，为正常流程块或浮点设置z-index将不会影响它们的渲染顺序。由于大多数元素不会建立新的堆叠上下文，因此任何未建立新堆叠上下文的元素的定位后代都将参与父(当前)堆叠上下文。

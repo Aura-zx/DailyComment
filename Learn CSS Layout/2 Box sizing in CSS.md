@@ -14,7 +14,7 @@
 
 CSS box的计算依赖于box model，每一个box都有一个content区域以及`可选`的围绕着content区域的padding，border和margin三个部分，如图所示。
 
-![box model](./imgs/LCL-2/box-model.png)
+![box model](../imgs/LCL-2/box-model.png)
 
 ### Content dimensions and margins
 
@@ -29,7 +29,7 @@ CSS box的计算依赖于box model，每一个box都有一个content区域以及
 另外两个盒模型有趣的方面是`content dimension的计算`和`margin:auto对不同类型元素的影响`。content dimension也就是`height`和`width`的计算。
  
  如图总结了content dimension 和 margin:auto的机制。
-![calculation](./imgs/LCL-2/content-dimension-and-marginauto.png)
+![calculation](../imgs/LCL-2/content-dimension-and-marginauto.png)
 
 ### Box model calculations for inline elements
 

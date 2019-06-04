@@ -37,3 +37,69 @@ CSS 3的`flexbox`布局是解决管理负空间的一个方案。它提供了很
   - `align-self`：子元素用来复写父元素`align-items`属性
 
 如果只有一个属性值得注意的话，那就是`flex-basis`，它是决定 flex resizing 和 flex 项目如何放置在 flex lines 上的关键。
+
+### display:flex and anonymous box generation
+
+首先，如何触发`flexbox`布局以及它适用于哪些元素？
+
+`flexbox`布局影响每一个父元素下面所有的直接子元素。要触发`flexbox`布局，将父元素设置为`display:flex`。该父项的每个子元素都将使用`flexbox`布局。
+
+> ​	与块级格式化上下文和内联格式化上下文的工作方式类似，flex容器的每个子元素都变为flex项；如果有必要，对于没有包含元素的文本内容匿名盒，每一个in-flow子项都变为flex项，并且直接包含在flex容器内的每个连续文本行都包含在匿名flex项中。但是，不会渲染仅包含空格的匿名flex项(例如，可能受空白属性影响的字符)，就好像它是`display:none`。[source](https://www.w3.org/TR/css-flexbox-1/#flex-items)
+
+但是，absolute定位的子项被排除在外。
+
+> ​	flex容器中的absolute定位的子项不会在flex布局中。但是它却会被`order`属性影响，影响到它被渲染的顺序。[source](https://www.w3.org/TR/css-flexbox-1/#abspos-items)
+
+一个in-flow子项变成flex项意味着什么？
+
+> flex项的`display`值会被阻塞：如果生成flex容器的元素的in-flow子节点的`display`值是内联级别的值，则计算块级别的等效值。
+>
+> 一些`display`值会触发生成一个围绕原盒子的匿名盒。它是最外层的盒子-flex容器的直接子盒，会成为一个flex项。例如两个相邻的`display:table-cell`子元素，包裹它们的匿名table盒子会成为一个flex项。
+
+总结一下，所有的`display:inline-*`的子元素都会被当做`display:block`，例如，`display:inline-table`会变成`display:table`；flex项的尺寸取决于它基于的最外层盒子。
+
+### Flex container properties: main and cross axis
+
+Flexbox 父项可以决定子项是水平或者垂直布局。你可以按照自己需要切换它们的方向，flexbox的标准使用了`main axis`和`cross axis`来命名，子项堆叠的方向称为主轴，垂直于主轴的轴称为横轴
+
+![main axis and cross axis](../imgs/LCL-4/main axis and cross axis.png)
+
+`flex-direction`属性控制着主轴的方向。默认值是`flex-direction:column`，其它可能的值如下图所示
+
+![flex-direction](../imgs/LCL-4/flex-direction value.png)
+
+### Flex container properties: flex lines
+
+就像内联格式化上下文一样，flex容器的内容可以布局在很多行上。
+
+> Flex items in a flex container are laid out and aligned within *flex lines*, hypothetical containers used for grouping and alignment by the layout algorithm.
+
+`flex-wrap`属性控制着子元素是否包裹或者溢出。
+
+> A flex container can be either single-line or multi-line, depending on the flex-wrap property:
+>
+> - A *single-line* flex container lays out all of its children in a single line, even if that would cause its contents to overflow.
+> - A *multi-line* flex container breaks its flex items across multiple lines, similar to how text is broken onto a new line when it gets too wide to fit on the existing line. When additional lines are created, they are stacked in the flex container along the cross axis according to the flex-wrap property. Every line contains at least one flex item, unless the flex container itself is completely empty. [source](http://www.w3.org/TR/2015/WD-css-flexbox-1-20150514/#flex-lines)
+
+![flex-wrap](../imgs/LCL-4/flex-wrap.png)
+
+### Flex items: flex item sizing
+
+为了理解 flex 项如何在 flex lines 上分布的，需要先知道他们的尺寸是如何计算的。[flex标准中Section 9](https://www.w3.org/TR/css-flexbox-1/#layout-algorithm) 描述
+
+了布局算法的细节，但就我们的目的而言，有趣的是要注意定位按照下面的顺序执行：
+
+1. 使用`flex-basis`计算容器的大小和每个flex项目的初始大小
+2. 将 flex 项分配给 flex lines，(如果有`flex-warp`属性)
+3. 每个 flex 项的最终大小由`flex-grow` 和`flex-shrink`计算得出
+4. flex lines 在主轴上对齐(`justify-content`)
+5. flex lines 在副轴上对齐(`align-items`,`align-content`和`align-self` )
+
+换句话说，这个顺序中有三个高级步骤：
+
+- `将项目分配到flex lines`：计算 flex 项目的初始大小，并根据这个大小在 flex lines 上划分项目
+- `在每个flex line上面重新计算flex项的尺寸`：在每条line上计算每个item的最终大小
+- `对齐lines和items`：先是lines的对齐，然后是items的对齐
+
+### flex-basis
+

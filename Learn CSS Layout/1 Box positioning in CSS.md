@@ -52,7 +52,7 @@ CSS布局的核心就是把HTML的元素映射一些`rectangular boxes`，这些
 
 block formatting 规则比较简单，如图它遵循这样一些规则
 
-![block box](./imgs/LCL-1/block-box.png)
+![block box](../imgs/LCL-1/block-box.png)
 
 - 每个block box在父盒子的左外边缘
 - float不会影响左外边缘的位置，但会影响文字的位置

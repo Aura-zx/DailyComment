@@ -103,3 +103,46 @@ Flexbox 父项可以决定子项是水平或者垂直布局。你可以按照自
 
 ### flex-basis
 
+`flex-basis`是理解 flexbox 布局是如何计算的关键属性，因为它会影响 flex 项如何分割到其它线上以及之后发生的 flex 计算。
+
+`flex-basis`属性作用在 flex 项上(它也可以继承自父元素)
+
+合法的值：
+
+> - *auto*: When specified on a flex item, the auto keyword retrieves the value of the main size property as the used flex-basis. If that value is also auto, then the used value is content.
+> - *content*: Indicates automatic sizing, based on the flex item’s content.
+> - *width*: For all other values, flex-basis is resolved the same way as width in horizontal writing modes: percentage values of flex-basis are resolved against the flex item’s containing block, i.e. its flex container, and if that containing block’s size is indefinite, the result is the same as a main size of auto. Similarly, flex-basis determines the size of the content box, unless otherwise specified such as by box-sizing. [source](http://www.w3.org/TR/2015/WD-css-flexbox-1-20150514/#flex-basis-property)
+
+正如标准里描述的，`flex-basis`属性控制弹性项目的初始主要大小，这一过程是在根据弹性因子分配自由空间之前的。
+
+> specifies the flex basis: the initial main size of the flex item, before free space is distributed according to the flex factors. [source](http://www.w3.org/TR/2015/WD-css-flexbox-1-20150514/#flex-basis)
+
+本质上，`flex-basis`如果有具体的值，那么在 flex 相关的计算中作用是替代`width`或`height`的角色，所谓具体的值就是px或者百分比(相对于父元素)。
+
+如果`flex-basis`的值被设置为`auto`或者`content`后，则与 flex 相关的计算可以通过并使用在元素本身上设置的值，或通过基于内容的计算得出。标准提供了以下说明：
+
+![flex-basis](../imgs/LCL-4/flex-basis.png)
+
+但我认为从四种不同的弹性尺寸操作模式(我提出的术语，并不是标准术语)方面更容易理解`flex-basis`。
+
+`purely proportional`：纯比例运算模式，设置`flex-basis:0`相当于将子元素的默认`width`或者`height`为`0px`，换句话说：
+
+- flex 项目内容的实际宽度对元素计算的最终大小没有任何影响
+- flex 项永远不会换行，因为关于何时换行到新行的决定是基于子项的 flex 基本大小完成的，并且显式设置的[确定值](https://www.w3.org/TR/css-flexbox-1/#definite)优先于 flexbox 算法
+
+`fixed basis + proportional`：固定基数+比例运算模式，设置`flex-basis: Npx`，`N`会导致在计算元素大小时将这些元素视为具有`N`个像素的 flex 的基本大小。
+
+- 当 flex 项的 flex base值的总和大于 flex 容器可用的主轴幅度，则会发生换行
+- 当计算`flex-grow`和`flex-shrink`时，将比例增长或收缩与`Npx`的基础尺寸相加或相减
+
+`auto basis + proportional`：自动基础 + 比例运算模式，设置`flex-basis:auto`，`flex-basis`的真实值回落到元素的`width`或`height`上，如果他们没有被指定，则回落到通常用于计算`width`和`height`的算法上。
+
+- 当做出需要换行的决定时，flex 项目是需要有确定的`width`和`height`的，如果没有，则大小基于内容
+- 当计算`flex-grow`或`flex-shrink`时，将比例增长或收缩与基础宽/高或者计算后的宽/高相加或相减
+
+`content basis + proportional`：内容基础 + 比例运算模式，设置`flex-basis:content`，计算 flex 项目的基础大小就好像底层元素具有`width:auto`和`height:auto`。
+
+- 关于换行和`flex-grow`、`flex-shrink`的决定都是在设置`width:auto`和`height:auto`计算的值上运行的
+- 目前`flex-basis:content`非常新，在Chrome和Firefox都不支持
+
+现在已经了解了`flex-basis`属性是什么以及如何影响 flexbox 的计算，接下来看一下 flex 项目是如何分割到 flex lines 上的。

@@ -146,3 +146,67 @@ Flexbox 父项可以决定子项是水平或者垂直布局。你可以按照自
 - 目前`flex-basis:content`非常新，在Chrome和Firefox都不支持
 
 现在已经了解了`flex-basis`属性是什么以及如何影响 flexbox 的计算，接下来看一下 flex 项目是如何分割到 flex lines 上的。
+
+### Dividing flex items onto flex lines
+
+flex 项被分割到不同的 flex line 上是基于`hypothetical main size`，在标准的[9.3节](http://www.w3.org/TR/css3-flexbox/#main-sizing)有具体的描述，将 flex 项目分割到 flex lines 上的过程非常简单：
+
+> Collect flex items into flex lines:
+>
+> - If the flex container is single-line, collect all the flex items into a single flex line.
+> - Otherwise, starting from the first uncollected item, collect consecutive items one by one until the first time that the next collected item would not fit into the flex container’s inner main size (or until a forced break is encountered, see §10 Fragmenting Flex Layout). If the very first uncollected item wouldn’t fit, collect just it into the line.
+>
+> For this step, the size of a flex item is its outer hypothetical main size.
+>
+> Repeat until all flex items have been collected into flex lines.
+
+这里面唯一 tricky 的地方是如何理解`outer hypothetical main size`。
+
+[标准9.3](http://www.w3.org/TR/css3-flexbox/#algo-main-item)中描述了这一过程的细节，简单地说，如果`flex-basis`被设置了确定的值(比如具体的像素值)，这就是 flex 的基本大小，通常这是盒子在主轴上可以采用的适应其内容的最小尺寸。
+
+`hypothetical main size`的计算是通过将`min-width`,`min-height`,`max-width`,`max-height`用作约束于 flex basis 得出的值。
+
+> The hypothetical main size is the item’s flex base size clamped according to its min and max main size properties.
+
+那一节的细节还是比较纷繁复杂的，有一个简单的方法可以去看这个值在实际是怎么实现的：设置`flex-grow`和`flex-shrink`为`0`去禁止`resizing`行为和设置`width/height`为`0`。这可以让你直观地看到每一个子元素的主轴尺寸的计算。由于换行发生在任何增长或收缩之前，因此在启用增长或收缩后，换行的断点相同。
+
+请注意，自从最初撰写本章以来，规范发生了变化，最初的版本中，内在大小的规则是：
+
+> The main-size min-content/max-content contribution of a flex item is its outer hypothetical main size when sized under a min-content/max-content constraint (respectively)
+
+但是2015年之后：
+
+> The main-size min-content/max-content contribution of a flex item is its outer min-content/max-content size, clamped by its flex base size as a maximum (if it is not growable) and/or as a minimum (if it is not shrinkable), and then further clamped by its min/max main size properties.
+
+现在，代替了`hypothetical outer main size`， 在`flex-grow:0`/`flex-shrink:0` 的条件下，flex 项的值是`min(max(content-size, flex-basis), max-width/max-height)` / `max(min(content-size, flex-basis), min-content-size)`。
+
+下面的例子展示出了四种不同的操作，从左至右分别是：
+
+- `flex-basis: 0` with `width: 45px` on each flex item results in the items having at least a `0px` width, or their content size if it is greater.
+- `flex-basis: 10px` with `width: 45px` on each flex item results in the items having at least a `10px` width, or their content size if it is greater.
+- `flex-basis: 35px` with `width: 45px` on each flex item results in the items having at least a `35px` width, or their content size if it is greater.
+- `flex-basis: 35px` with `width: 45px` and `max-width: 10px` on each flex item results in the items having a `10px` width.
+- `flex-basis: auto` with `width: 45px` on each flex item results in the items having a `45px` width, and the items wrap because the sum of flex basis sizes exceeds the flex container's width.
+- `flex-basis: content` with `width: 45px` on each flex item should result in the flex items being sized exactly to their content, but this value is not supported as of the time I'm writing this.
+
+![flex-lines-examples](/Users/zhouxin/Code/DailyComment/imgs/LCL-4/flex-linex.png)
+
+```html
+<div class="flex-parent blue">
+  <div class="green">aaa</div><div class="orange">bbbb</div><div class="red">ccc</div>
+</div>
+```
+
+```css
+.flex-parent {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  flex-grow: 0;
+  justify-content: flex-start;
+  width: 150px;
+  height: 100px;
+}
+```
+
+现在，我们已经看到项目是如何放置在 flex lines 上的，接下来我们看一下`flex-grow`和`flex-shrink`属性以及相关的计算工作。

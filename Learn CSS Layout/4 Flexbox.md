@@ -210,3 +210,159 @@ flex 项被分割到不同的 flex line 上是基于`hypothetical main size`，�
 ```
 
 现在，我们已经看到项目是如何放置在 flex lines 上的，接下来我们看一下`flex-grow`和`flex-shrink`属性以及相关的计算工作。
+
+### Resizing the flex items on each flex line
+
+`flex-grow`和`flex-shrink`控制了 flex 项是如何 resize 的，它们都接受一个无单位的非负数字，设置它们为`0`会导致禁止 flex 项目增加到它的 flex line 的大小，或者在 flex 项溢出 flex 容器时缩小它们。
+
+`flex-grow`的默认值是`0`，`flex-shrink`的默认值是`1`。当 flex line 的主轴尺寸大于其 flex 项总主轴尺寸时，应用`flex-grow`属性，当 flex line 的主轴尺寸小于其 flex 项总主轴尺寸时，应用`flex-shrink`属性。
+
+许多 flexbox 的指南有类似这样的描述：
+
+> If all items have flex-grow set to 1, every child will set to an equal size inside the container. If you were to give one of the children a value of 2, that child would take up twice as much space as the others.
+
+某种程度上是对的，至少在简单的例子里。比如，在下面的图中，标为`1`的 divs 拥有属性`flex-grow:1`，标为`2`的 divs 拥有属性`flex-grow:2`，它们表现得就像上面描述的一样。
+
+![flex-grow](/Users/zhouxin/Code/DailyComment/imgs/LCL-4/flex-grow.png)
+
+但是，正如我们之前关于`flex-basis`的讨论，这并不是整个的图景，因为`flex-basis`也参与了计算，而且，用于计算最终主轴尺寸的精确算法实际上在`flex-grow`和`flex-shrink`之间是不同的，最后`min-*`和`max-*`的约束也会影响这些计算。
+
+flexbox 的[标准9.7](http://www.w3.org/TR/css3-flexbox/#resolve-flexible-lengths)中详细描述了算法，但我在这里不会复制文本，因为由于许多复杂的因素都在都在规范的算法中处理，所以难以完全遵循它。
+
+使算法复杂化的主要因素是：
+
+- Inflexible 的项目，有着属性`flex-basis:0`和`flex-basis:Npx`的项目会立即占据空间；只有在应用这些项目后留下的空间才会被考虑用于 flex 项的尺寸调整。
+- max 和 min 的限制也参与到算法中。该规范的描述中花费了相当多的步骤来处理 flexbox 大小调整不应违反任何设置在 flex 项中的`min-width`和`min-height`的限制。这让我们知道了这些值是非常直观的，但是这些细节却不必要的复杂化了算法的解释。
+- `flex-grow`和`flex-shrink`完全不同的计算方法：空闲空间如何被分配的计算对于它们俩是不同的，这是我们接下来要注意的点。
+
+flex 大小调整循环的本质包括[三个步骤](http://www.w3.org/TR/css3-flexbox/#resolve-flexible-lengths)：
+
+> - Check for flexible items. If all the flex items on the line are frozen, free space has been distributed; exit this loop.
+> - Calculate the remaining free space as for initial free space, above. If the sum of the unfrozen flex items’ flex factors is less than one, multiply the initial free space by this sum. If the magnitude of this value is less than the magnitude of the remaining free space, use this as the remaining free space.
+> - Distribute free space proportional to the flex factors.
+
+最后一部分是`flex-grow`和`flex-shrink`的不同。
+
+### Calculations for flex-grow
+
+当使用 flex grow factor 时，自由空间分布的方法如下：
+
+> - Find the ratio of the item’s flex grow factor to the sum of the flex grow factors of all unfrozen items on the line.
+> - Set the item’s target main size to its flex base size plus a fraction of the remaining free space proportional to the ratio.
+
+让我们计算一个具体的例子，假设：
+
+- the flex parent container is `flex-direction: row` and has a width of `100px`
+- that there are two flex items:
+  - Item #1:
+    - has a flex base size of `10px` (e.g. `flex-basis: 10px`or `flex-basis: auto` plus `width: 10px`)
+    - has a `flex-grow` factor of `1`
+  - Item #2:
+    - has a flex base size of `20px`
+    - has a `flex-grow` factor of `2`
+
+跟着算法：
+
+- First, calculate the remaining free space. In this case, it is `100px` - `10px` - `20px` = `70px`
+- Find the ratios of the flex grow factor to the sum of the flex grow factors for each item. The ratios are:
+  - Item #1: `1/3`
+  - Item #2: `2/3`
+- Set the item’s target main size to its flex base size plus a fraction of the remaining free space proportional to the ratio.
+  - New size for item #1: `10px + 1/3 * 70px = 33.3333px`
+  - New size for item #2: `20px + 2/3 * 70px = 66.6666px`
+
+这个代码例子可以检验我们的计算
+
+```css
+.flex-parent {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  flex-basis: auto;
+  width: 100px;
+  height: 50px;
+}
+.one {
+  flex-grow: 1;
+  width: 10px;
+  border: none; /* simplify calculations */
+}
+.two {
+  flex-grow: 2;
+  width: 20px;
+  border: none;
+}
+```
+
+```html
+<div class="flex-parent blue">
+  <div class="one green">1</div><div class="two orange">2</div></div>
+</div>
+```
+
+### Calculations for flex-shrink
+
+当使用 flex shrink factor 时，自由空间分布方法如下：
+
+> - For every unfrozen item on the line, multiply its flex shrink factor by its inner flex base size, and note this as its scaled flex shrink factor.
+> - Find the ratio of the item’s scaled flex shrink factor to the sum of the scaled flex shrink factors of all unfrozen items on the line.
+> - Set the item’s target main size to its flex base size minus a fraction of the absolute value of the remaining free space proportional to the ratio.
+
+同样，让我们计算一个具体的例子，假设：
+
+- the flex parent container is `flex-direction: row` and has a width of `100px`
+- that there are two flex items:
+  - Item #1:
+    - has a flex base size of `100px`
+    - has a `flex-shrink` factor of `1`
+  - Item #2:
+    - has a flex base size of `100px`
+    - has a `flex-shrink` factor of `2`
+
+跟着算法：
+
+- First, calculate the remaining free space. In this case, it is `100px` - `100px` - `100px` = `-100px`
+- Calculate the scaled flex shrink factor, which is the flex base size multiplied by the flex shrink factor:
+  - Item #1: `1 * 100px = 100px`
+  - Item #2: `2 * 100px = 200px`
+- Calculate the ratio of the scaled shrink factor to the sum of scaled shrink factors:
+  - Item #1: `100 / 300 = 1/3`
+  - Item #2: `200 / 300 = 2/3`
+- Set the item’s target main size to its flex base size minus a fraction of the absolute value of the remaining free space proportional to the ratio.
+  - New size for item #1: `100px - 1/3 * 100px = 66.666px`
+  - New size for item #2: `100px - 2/3 * 100px = 33.333px`
+
+这个代码例子可以检验我们的计算
+
+```css
+.flex-parent {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  width: 100px;
+  height: 50px;
+}
+.one {
+  flex-shrink: 1;
+  width: 100px;
+  border: none; /* simplify calculations */
+}
+.two {
+  flex-shrink: 2;
+  width: 100px;
+  border: none;
+}
+```
+
+```html
+<div class="flex-parent blue">
+  <div class="one green">1</div><div class="two orange">2</div></div>
+</div>
+```
+
+为什么`flex-shrink`这样计算，而不使用更简单的`flex-grow`的计算方法， [标准7.1](http://www.w3.org/TR/2015/WD-css-flexbox-1-20150514/#flex-property)中的一个笔记这样解释：
+
+> Note: The flex shrink factor is multiplied by the flex base size when distributing negative space. This distributes negative space in proportion to how much the item is able to shrink, so that e.g. a small item won’t shrink to zero before a larger item has been noticeably reduced.
+
+像这样分配负空间会将更多的收缩分配给具有更大 flex basis 的项目，从而使较小的项目不会缩小到0。
+

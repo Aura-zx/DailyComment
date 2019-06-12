@@ -189,7 +189,7 @@ flex 项被分割到不同的 flex line 上是基于`hypothetical main size`，�
 - `flex-basis: auto` with `width: 45px` on each flex item results in the items having a `45px` width, and the items wrap because the sum of flex basis sizes exceeds the flex container's width.
 - `flex-basis: content` with `width: 45px` on each flex item should result in the flex items being sized exactly to their content, but this value is not supported as of the time I'm writing this.
 
-![flex-lines-examples](/Users/zhouxin/Code/DailyComment/imgs/LCL-4/flex-linex.png)
+![flex-lines-examples](../imgs/LCL-4/flex-linex.png)
 
 ```html
 <div class="flex-parent blue">

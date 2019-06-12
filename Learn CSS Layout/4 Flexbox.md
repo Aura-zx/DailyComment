@@ -28,7 +28,7 @@ CSS 3的`flexbox`布局是解决管理负空间的一个方案。它提供了很
 
 从这些属性上可以看出，`flexbox`的父元素在某种程度上类似常规段落的文本(例如内联级格式化上下文)，但不像正常的段落或者一个列表行，`flexbox`的父元素可以决定子元素的堆叠方向为水平(`flex-direction:row`)或者垂直(`flex-direction:column`)。
 
-- `flex项目`的属性
+- `flex项`的属性
   - `order`：元素的顺序
   - `flex`(缩写)
     - `flex-grow`：当主轴上留有空间时，分配给子元素的空间比例
@@ -36,7 +36,7 @@ CSS 3的`flexbox`布局是解决管理负空间的一个方案。它提供了很
     - `flex-basis`：子项的内容维度如何影响`flex-grow`和`flex-shrink`的计算
   - `align-self`：子元素用来复写父元素`align-items`属性
 
-如果只有一个属性值得注意的话，那就是`flex-basis`，它是决定 flex resizing 和 flex 项目如何放置在 flex lines 上的关键。
+如果只有一个属性值得注意的话，那就是`flex-basis`，它是决定 flex resizing 和 flex 项如何放置在 flex lines 上的关键。
 
 ### display:flex and anonymous box generation
 
@@ -89,7 +89,7 @@ Flexbox 父项可以决定子项是水平或者垂直布局。你可以按照自
 
 了布局算法的细节，但就我们的目的而言，有趣的是要注意定位按照下面的顺序执行：
 
-1. 使用`flex-basis`计算容器的大小和每个flex项目的初始大小
+1. 使用`flex-basis`计算容器的大小和每个flex项的初始大小
 2. 将 flex 项分配给 flex lines，(如果有`flex-warp`属性)
 3. 每个 flex 项的最终大小由`flex-grow` 和`flex-shrink`计算得出
 4. flex lines 在主轴上对齐(`justify-content`)
@@ -97,7 +97,7 @@ Flexbox 父项可以决定子项是水平或者垂直布局。你可以按照自
 
 换句话说，这个顺序中有三个高级步骤：
 
-- `将项目分配到flex lines`：计算 flex 项目的初始大小，并根据这个大小在 flex lines 上划分项目
+- `将项分配到flex lines`：计算 flex 项的初始大小，并根据这个大小在 flex lines 上划分项
 - `在每个flex line上面重新计算flex项的尺寸`：在每条line上计算每个item的最终大小
 - `对齐lines和items`：先是lines的对齐，然后是items的对齐
 
@@ -223,7 +223,7 @@ flex 项被分割到不同的 flex line 上是基于`hypothetical main size`，�
 
 某种程度上是对的，至少在简单的例子里。比如，在下面的图中，标为`1`的 divs 拥有属性`flex-grow:1`，标为`2`的 divs 拥有属性`flex-grow:2`，它们表现得就像上面描述的一样。
 
-![flex-grow](/Users/zhouxin/Code/DailyComment/imgs/LCL-4/flex-grow.png)
+![flex-grow](../imgs/LCL-4/flex-grow.png)
 
 但是，正如我们之前关于`flex-basis`的讨论，这并不是整个的图景，因为`flex-basis`也参与了计算，而且，用于计算最终主轴尺寸的精确算法实际上在`flex-grow`和`flex-shrink`之间是不同的，最后`min-*`和`max-*`的约束也会影响这些计算。
 
@@ -366,3 +366,132 @@ flex 大小调整循环的本质包括[三个步骤](http://www.w3.org/TR/css3-f
 
 像这样分配负空间会将更多的收缩分配给具有更大 flex basis 的项目，从而使较小的项目不会缩小到0。
 
+### Flex line alignment and flex item alignment
+
+最后，flex line 和 flex item 有很多种方法可以对齐，相较于 flex 项目的尺寸计算，对齐是一个非常简单的过程：
+
+如果在调整项目大小后有剩余空间，则根据相关属性进行分配。
+
+对于项目的对齐，每一个 flex line 是独立布局的。
+
+> Once content is broken into lines, each line is laid out independently; flexible lengths and the justify-content and align-self properties only consider the items on a single line at a time.
+
+### Main axis alignment: justify-content
+
+flex 项目在每一条线上的对齐是由`justify-content`属性控制：
+
+> The `justify-content` property aligns flex items along the main axis of the current line of the flex container. This is done after any flexible lengths and any auto margins have been resolved. Typically it helps distribute extra free space leftover when either all the flex items on a line are inflexible, or are flexible but have reached their maximum size. It also exerts some control over the alignment of items when they overflow the line. [source](http://www.w3.org/TR/css3-flexbox/#propdef-justify-content)
+
+注意`margin:auto`的优先级会高于`justify-content`：
+
+> Distribute any remaining free space. For each flex line:
+>
+> - If the remaining free space is positive and at least one main-axis margin on this line is auto, distribute the free space equally among these margins. Otherwise, set all auto margins to zero.
+> - Align the items along the main-axis per justify-content. [source](http://www.w3.org/TR/css3-flexbox/#main-alignment)
+
+下面的示例图展示了所有`justify-content`可能的值
+
+![justify-content](../imgs/LCL-4/justify-content.png)
+
+### Cross axis alignment for flex lines: align-content
+
+`align-content`，`align-items`和`align-self`三个属性决定了在副轴上的对齐方式。
+
+> The `align-content` property aligns a flex container’s lines within the flex container when there is extra space in the cross-axis, similar to how justify-content aligns individual items within the main-axis. Note, this property has no effect on a single-line flex container. [source](http://www.w3.org/TR/css3-flexbox/#align-content-property)
+
+注意，`align-content`不会影响 single-line 的 flex container，例如，容器设置了`flex-wrap:nowrap`。
+
+> In a single-line flex container, the cross size of the line is the cross size of the flex container, and align-content has no effect. The main size of a line is always the same as the main size of the flex container’s content box. [source](http://www.w3.org/TR/2015/WD-css-flexbox-1-20150514/#flex-lines)
+
+对于 multi-line 的 flex container，有两个高度(副轴尺寸)需要考虑：flex container 的副轴尺寸和每一条 flex line 的高度。`align-content`处理这两个总和之间的差异。每条 flex line 的高度由它们的内容决定。
+
+> In a multi-line flex container (even one with only a single line), the cross size of each line is the minimum size necessary to contain the flex items on the line (after aligment due to align-self), and the lines are aligned within the flex container with the align-content property. [source](http://www.w3.org/TR/2015/WD-css-flexbox-1-20150514/#flex-lines)
+
+下面的示例图展示了所有`align-content`可能的值
+
+![align-content](../imgs/LCL-4/align-content.png)
+
+### Cross axis alignment for flex items: align-items, align-self
+
+`align-items`和`align-self`由相同的作用：它们控制每一条 flex line 上面独立的项对齐方式。`align-items`在 flex container 上设置并充当默认值，可以根据需要使用 `align-self`在每个单独的 flex 项上覆盖它们。这两个属性接受在同一个集合中的值，`align-self`也接受并且默认值为`auto`，这意味着使用`align-items`的值。
+
+> Flex items can be aligned in the cross axis of the current line of the flex container, similar to justify-content but in the perpendicular direction. align-items sets the default alignment for all of the flex container’s items, including anonymous flex items. align-self allows this default alignment to be overridden for individual flex items. (For anonymous flex items, align-self always matches the value of align-items on their associated flex container.)
+>
+> If either of the flex item’s cross-axis margins are auto, align-self has no effect. [source](http://www.w3.org/TR/css3-flexbox/#align-items-property)
+
+下面的示例图展示了所有`align-items`可能的值
+
+![align-items](../imgs/LCL-4/align-items.png)
+
+### The order property
+
+`order`属性允许你对 flex 项重排序。
+
+> Flex items are, by default, displayed and laid out in the same order as they appear in the source document. The order property can be used to change this ordering.
+>
+> The order property controls the order in which children of a flex container appear within the flex container, by assigning them to ordinal groups. It takes a single integer value, which specifies which ordinal group the flex item belongs to.
+>
+> A flex container lays out its content in order-modified document order, starting from the lowest numbered ordinal group and going up. Items with the same ordinal group are laid out in the order they appear in the source document. This also affects the painting order , exactly as if the flex items were reordered in the source document. [source](http://www.w3.org/TR/css3-flexbox/#order-property)
+
+例子如下
+
+```css
+.parent {
+  display: flex;
+  flex-direction: row;
+}
+.child-one {
+  order: 3;
+}
+.child-two {
+  order: 2;
+}
+.child-three {
+  order: 1;
+}
+```
+
+```html
+<div class="parent blue">
+  <div class="child-one green">A</div>
+  <div class="child-two orange">B</div>
+  <div class="child-three violet">C</div>
+</div>
+```
+
+### Miscellaneous interactions
+
+现在，你知道了 flex container 是如何创建的，flex items 是怎样放置在 flex lines 上，flex items 的大小如何计算，以及它和 flex lines 是怎么对齐的，你知道了 flexbox 布局的主要特性。
+
+接下来，我们将看一些 flexbox 和其他属性是如何相互影响的一些有趣的例子。
+
+### Centering with flexbox
+
+将 flexbox 居中十分简单：只需要使用 single-line 的 flex container，设置`justify-content`和`align-items`属性：
+
+```css
+html, body { height: 100%; }
+.parent {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+```
+
+```html
+<div class="parent blue">
+  <div class="child green">Centered</div>
+</div>
+```
+
+### Using margin: auto with flexbox
+
+设置`margin:auto`在主轴上会覆盖`justify-content`属性
+
+设置`margin:auto`在副轴上会覆盖`align-items`属性
+
+### Using min-* and max-* with flexbox
+
+你可以结合 flexbox 和`min-width`,`min-height`,`max-height`和`max-width`限制 flex 项的尺寸在一个特别的最大或最小值之内。

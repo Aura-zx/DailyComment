@@ -28,3 +28,63 @@ CSS 3 增加了`vh`和`vw`单位，它始终指向视口的宽度和高度，这
 `Sizing with constraints`你可以利用通过基于约束的大小填充算法填充缺失值，适用于`position: absolute`的元素以及`display:block`的元素，但是后者只适用在宽度上。
 
 如果你对绝对定位的元素设置了`width`或者`height`为`auto`，但是设置了`margin`的具体值，这样绝对定位的盒子的大小会自动调整以占据所有除了`margin`留下以外的可用空间。
+
+### CSS layout tricks and techniques used for positioning
+
+定位是布局的核心：或许最重要的任务是将元素放置在所有屏幕尺寸的正确相对位置。本节中的技术允许您完成此操作。
+
+- Relative + absolute positioning
+- Negative margins
+- Transforms
+- `margin:auto`
+- Positioning with constraints
+
+`Relative + absolute positioning`：`position:absolute`功能强大，因为你可以通过设置相对父元素的上下左右四个方向的偏移量来对齐元素。但是，在大多数情况下，您实际上并不想相对于视口定位div，您希望它相对于特定父级定位。
+
+`Negative margins`：margins 在 CSS 里是可以设置为负数的；一般来说这个特性不是特别有用，因为当元素大小不固定时很难正确地使用这个特性。但是，它可能对一些本来很难的事情很有用。例如，如果你想让一个元素溢出 —例如图像轮播导航按钮— 设置一个固定的负边距可以故意造成溢出。另一个突出用例是主要用在旧版本的 IE 上，你讲在后面看到。
+
+`Transforms`：CSS 3 引入了`transform:translate()`方法，它允许元素的定位根据它自己的长宽决定。这是一个使用负边距的可行替代方案。学习它是很值得的，具体而言，它允许将值表现为当前框的百分比，而不是之前 CSS 中的父盒子的百分比。例如`transforms:translateX(-50%)`将会向左移动当前盒子宽度50%的距离，对于没有固定的预定宽度的盒子，使用负边距也是不能做到的。
+
+`margin:auto`：设置`margin:auto`在两种情况下很有用，因为这样可以使用内置算法实现居中。
+
+- 设置`margin-left:auto`和`margin-right:auto`在块级盒子上可以让他们水平居中，还需要设置`width`来保证这个效果。
+- 设置`margin:auto`和`position:absolute`可以让盒子水平和垂直居中，还需要设置`width`和`height`的值以及所有的偏移量(`top`,`left`,`bottom`,`right`)为`0`来保证这个效果。
+
+`Positioning with constraints`：对于设置了`width`和`display:block`属性的盒子，你可以通过`position:absolute`属性做很多有趣的事情。对于绝对定位的元素，可以触发基于限制的大小计算。
+
+例如，你想让一个盒子定位在一个父盒子的左边或右边，同时保持垂直居中，就像轮播图的左右导航按钮那样。为了达到这个效果，先将父盒子设置为`position:relative`，然后使用下面的样式：
+
+```css
+.parent {
+  position: relative;
+  width: 80%;
+  height: 80%;
+  margin: 0 40px;
+}
+.previous, .next {
+  position: absolute;
+  width: 30px;
+  height: 20px;
+  top: 0;
+  bottom: 0;
+  margin: auto;
+}
+.previous {
+  left: 0;
+  margin-left: -15px;
+}
+.next {
+  right: 0;
+  margin-right: -15px;
+}
+```
+
+```html
+<div class="parent blue">
+  <div class="previous green">prev</div>
+  <div class="next red">next</div>
+</div>
+```
+
+在垂直方向上，`top:0`，`bottom:0`，`margin-top:auto`，`margin-bottom:auto`的结合触发了居中。在水平方向上，对于`.parent`div，`left:0`，`right:0`，`margin-right:auto`，`margin-left:-15px(或者 auto)`可以让盒子定位在父盒子的左边缘。`-15px`的负边距(宽度的一半)将盒子整齐的放在盒子的顶部，`.next`div同理。
+

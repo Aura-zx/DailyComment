@@ -88,3 +88,82 @@ CSS 3 增加了`vh`和`vw`单位，它始终指向视口的宽度和高度，这
 
 在垂直方向上，`top:0`，`bottom:0`，`margin-top:auto`，`margin-bottom:auto`的结合触发了居中。在水平方向上，对于`.parent`div，`left:0`，`right:0`，`margin-right:auto`，`margin-left:-15px(或者 auto)`可以让盒子定位在父盒子的左边缘。`-15px`的负边距(宽度的一半)将盒子整齐的放在盒子的顶部，`.next`div同理。
 
+### Float-based grids: how CSS grid framework work
+
+Grid 布局框架是现代布局的多功能工具。它们允许你讲任何内容区域拆分为一组列，同时允许布局适应移动视口大小。
+
+相对于使用 float 将元素定位在某一列的左边或者右边，Grid 框架使用适当大小的多个 float 将空间细分为列。
+
+这些列有许多良好的属性：
+
+- 它们能按照预期地工作，用于左右对齐的内容，即列彼此对齐，右对齐列与右侧对齐
+- 使用一列固定的百分比宽度，任何可用空间都可以分为子列
+
+像 Bootstrap 这样的 Grid 框架通常使用一些关键属性和技术。首先，设置`box-sizing:border-box`使得计算`padding`更加简单。
+
+下一步， Gird 框架使用四种技术来实现它们的行为：
+
+`Floats`，列本身只是简单的有着属性`float:left`的 divs，这样可用于将盒子放置在其容器盒的左右边缘。对于Grid 框架，因为 floats 始终堆叠在左侧，就可以设置为必须占用父宽度的特定百分比。
+
+`Percentage-base width`，grid 列的`width`值被定义为它父元素的百分比。框架保证这些宽度加起来是`100%`，考虑到四舍五入可能出现的问题。这意味着列将始终适合框架中的单个行，并占据总宽度的一些除数。
+
+例如，在12列布局中，1列的 float将分配给他的可用宽度(百分比)的 1/12，放置一个4列的 float 和 8列的 float 将允许 33%:66% 的可用空间分割。
+
+`Relative positioning`，Grid 框架的列一般默认设置`position:relative`，这可以使他们充当任何绝对定位内容的参考点。
+
+`Grid row clearing`，为了包含和清除浮动，网格行要么建立新的格式化上下文或者使用 clearfix。
+
+`Clearfix`，多年来，clearfix 有几个不同的版本，现代版本不那么糟糕，因为他们包含较少旧的 IE 特定修复程序。
+
+clearfix 将几个理想的属性组合到一个类中：
+
+- 它可以防止已经清除浮动的父元素中浮动影响已清除浮动元素后面其他元素中的 line box
+- 它会在计算元素的高度时考虑已清除浮动的父元素的 floats
+
+`Creating formatting contexts`，创建新的格式化上下文是一个很有用的方法，它可以控制 floats 和页面的剩余部分交互。
+
+新的格式化上下文：
+
+- contains floats：floats 仅与同一格式化上下文中的元素交互
+- Interacts with floats as a unit：建立格式化上下文的框放置在浮动框旁边，或者不合适，则在其下方清除；格式化上下文之外的 floats 不会影响建立新格式化上下文的框的内容
+- 防止边距在建立格式化上下文的框与其父级之间折叠
+
+让我们创建自己的基本 Grid 框架来演示这些技术如何协同工作。以下实例说明：
+
+```css
+* { box-sizing: border-box; }
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+.column-4, .column-8 {
+  float: left;
+  position: relative;
+}
+.column-4 {
+  width: 33.3333%;
+}
+.column-8 {
+  width: 66.6667%;
+}
+```
+
+```html
+<div class="row">
+  <div class="column-4 blue">4-col</div>
+  <div class="column-8 green">8-col</div>
+</div>
+<div class="row">
+  <div class="column-4 blue">4-col</div>
+  <div class="column-4 green">4-col</div>
+  <div class="column-4 orange">4-col</div>
+</div>
+```
+
+![grid framework](../imgs/LCL-5/grid-framework.png)
+
+为了使其适应不同的大小，行可以具有定义的转换点，其中它们使用媒体查询切换到不同的大小。对于屏幕较小的屏幕尺寸，您将需要将列更改为更基本的`display:block`和`float:none`布局。
+
+### Techniques for horizontal and vertical centering in CSS
+

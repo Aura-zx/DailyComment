@@ -167,3 +167,74 @@ clearfix 将几个理想的属性组合到一个类中：
 
 ### Techniques for horizontal and vertical centering in CSS
 
+水平和垂直居中在 CSS 中是很复杂的，有很多基于不同需求和权衡的技术，可以看一看shshaw的 [codepen resource on centering](http://codepen.io/shshaw/full/gEiDt)作为额外的例子，当然他对于这些技术为什么可以工作的解释过于复杂，因为`position:absolute`的盒子是简单的应用了 [sized in one step using the constraint-based algorithm](http://book.mixu.net/css/2-box-model.html#absolutely-positioned-non-replaced-elements)，没有5个步骤这么多。
+
+在本节中，我将演示水平和垂直居中的技术，并要求您思考它们的工作原理以及它们的优点和缺点。
+
+首先，我将介绍三种技术，这些技术允许您将项目至于水平轴或者垂直轴上，但不能同时使用两者。
+
+`Horizontally centering block-level elements in normal flow`，你可以触发水平居中在块级盒子元素中：
+
+```css
+.block-center {
+  display: block;
+  width: 30px;
+  margin-left: auto;
+  margin-right: auto;
+}
+```
+
+```html
+<div class="blue">
+  <div class="block-center green">Centered</div>
+</div>
+```
+
+![centering-1](../imgs/LCL-5/centering-1.png)
+
+这个技术的缺点在于需要明确指定块的宽度才能进行居中。例如，在上面的例子中，文本溢出了一点，因为我没有得到完全正确的宽度。
+
+`Horizontally centering inline-level elements within line boxes`，`text-align`属性允许内联元素水平居中。
+
+```css
+.text-align-center {
+  text-align: center;
+}
+```
+
+```html
+<div class="text-align-center blue">
+  <span class="green">Centered</span>
+</div>
+```
+
+![centering-2](../imgs/LCL-5/centering-2.png)这个方法的问题在于长行文本将在内联格式化上下文中包装到多个线框中，而且只有在线框被分解后才会应用居中，对于文本来说这是正确的行为，但如果您将非文本项目居中，则当包含元素非常小并且项目被分解到多个线框时，您可能会看到不期望的行为。
+
+`Vertically centering inline-block elements`，`vertical-align`属性应用在内联块元素上可以让它在内联格式化上下文中垂直居中。
+
+```css
+.valign-center {
+  vertical-align: middle;
+  height: 100px;
+}
+```
+
+```html
+<div class="valign-center blue">
+  <span class="green">Centered</span>
+</div>
+```
+
+![centering-3](../imgs/LCL-5/centering-3.png)
+
+这里设置了`vertical-align:middle`没有导致单个内联元素垂直居中，原因是内联级内容首先被分割到 line box 上，它们的位置只是从容器的顶部开始，建立了格式化上下文。`vertical-align:middle`只影响同一 line box 中的内联块级的相对对齐，line box 的高度由它的内容决定，由于只有一个项目，line box 的高度和项目的高度完全匹配，最终结果是 line box 位于父容器顶部。
+
+由两种方法可以解决上面的问题
+
+1. 指定`line-height`的值
+2. 使用一个 inline-block 的伪元素强制当前 line box 的高度为父元素高度的100%
+
+对于方法1，不能设置`line-height`为100%，因为 line-height 是相对于父元素的 font height，而不是父元素的container height
+
+对于方法2，需要使用 inline-block 因为正常的内联级盒子没有`height`属性所以不能参照父元素的高度。
+

@@ -333,3 +333,77 @@ clearfix 将几个理想的属性组合到一个类中：
 
 `flexbox based centering`：Flexbox 的居中技术是最不令人惊讶的技术，属性就如描述的那样工作。
 
+```css
+.flexbox-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100px;
+  width: 200px;
+}
+```
+
+```html
+<div class="flexbox-center blue">
+  <div class="green">Centered</div>
+</div>
+```
+
+![centering-6](..\imgs\LCL-5\centering-6.png)
+
+使用 flexbox 时有什么需要注意的吗？
+
+> 首先，flexbox 不支持所有的浏览器，一些老的版本还需要一些前缀(`display:-webkit-flex`，`display:-ms-flexbox`)。
+>
+> 其次，flexbox 居中还是基于 line 的，如果你有多个需要居中的项目，需要设置`flex-wrap: nowrap`。
+
+### Box rendering and stacking context
+
+最后，为了测试你关于堆叠上下文的知识，我将考验你一个发表在[Philip Walton's blog](http://philipwalton.com/articles/what-no-one-told-you-about-z-index/)上的问题。
+
+```css
+.red, .green, .blue {
+  position: absolute;
+  width: 200px;
+  height: 50px;
+}
+.red {
+  z-index: 1;
+}
+.green {
+  top: 20px;
+  left: 20px;
+}
+.blue {
+  top: 40px;
+  left: 40px;
+}
+```
+
+```html
+<div>
+  <div class="red">Red</div>
+</div>
+<div>
+  <div class="green">Green</div>
+</div>
+<div>
+  <div class="blue">Blue</div>
+</div>
+```
+
+![stacking-puzzle](..\imgs\LCL-5\stacking-puzzle.png)
+
+通过改变 CSS 将红色的 div 放在绿色和蓝色 div 的后面，不能做的操作
+
+1. 不能改动 HTML
+2. 任何元素的 `z-index` 或者 `position`
+
+答案
+
+> 强制 div 创建新的堆叠上下文
+>
+> `z-index`属性仅影响单个堆叠上下文中的相对堆叠顺序。如果 div 在不同的堆叠上下文中，`z-index`的顺序是不确定的，div 的渲染顺序是从后到前的，所以绿色背后是红色，蓝色背后是绿色。
+>
+> 你可以通过设置以下其中一个属性来触发新的堆叠上下文，例如，`div {opacity: 0.99}`或者 `div {transform: translateX(0)}`
+

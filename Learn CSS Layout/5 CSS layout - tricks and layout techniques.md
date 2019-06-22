@@ -238,3 +238,98 @@ clearfix 将几个理想的属性组合到一个类中：
 
 对于方法2，需要使用 inline-block 因为正常的内联级盒子没有`height`属性所以不能参照父元素的高度。
 
+### Horizontal and Vertical centering
+
+上面提到技术的唯一问题是不能轻易地应用在垂直居中上。这一届，我们将讨论一些能完成水平居中和垂直居中的技术：
+
+- 基于`position: absolute`属性约束的居中(IE8+)
+- 基于`position: absolute`负边距的居中(适用所有浏览器)
+- flexbox 的居中(IE10+)
+
+这些涵盖了适用于所有浏览器的各种技术，甚至包括IE。shshaw 的 [codepen centering](http://codepen.io/shshaw/full/gEiDt) 包含了这些额外的技术。
+
+`position: absolute constraint based centering`：首先，这个技术可以正常应用在所有现代浏览器(IE8+)上，除非你需要支持古老的 IE，否则这可能是一种合理的默认方法。
+
+```css
+* { box-sizing: border-box; }
+.center-container {
+  position: relative;
+  height: 100px;
+  width: 200px;
+}
+.dialog {
+  height: 40%;
+  width: 50%;
+}
+.absolute-center {
+  margin: auto;
+  position: absolute;
+  top: 0; left: 0; bottom: 0; right: 0;
+}
+```
+
+```html
+<div class="center-container blue">
+  <div class="dialog absolute-center green">Centered</div>
+</div>
+```
+
+![centering-4](..\imgs\LCL-5\centering-4.png)
+
+为什么能居中？
+
+> 父元素的`position: relative`可以让它显式定位，但是由于没有指定偏移量，因此它的位置就像在正常流中。
+>
+> 设置`position: absolute`在 dialog 上让它跳出文档流并且绝对定位。
+>
+> 一般来说在绝对定位模式下，`margin:auto`会被设置为`0`，但是，当元素的尺寸和定位的偏移量指定之后，`margin:auto`就会使用基于限制的方法去计算剩余空间，并将它们分配到边距中，这就让元素在水平和垂直两个方向上都居中了，这是利用水平边距和垂直边距完成的。
+
+这个方法有什么缺点？
+
+>需要指定元素的宽和高，也可以使用max/min-width/height或者百分比形式。还有，这个方法只支持IE8以后的浏览器。
+
+`position: absolute negative margin based centering`。负边距居中技术的唯一好处是它能在古老版本的IE上也能正常工作。
+
+```css
+* { box-sizing: border-box; }
+.center-container {
+  position: relative;
+  height: 100px;
+  width: 200px;
+}
+.absolute-center-negative {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 100px;
+  margin-left: -50px; /* (width + padding)/2 */
+  height: 50px;
+  margin-top: -25px; /* (height + padding)/2 */
+}
+```
+
+```html
+<div class="center-container blue">
+  <div class="absolute-center-negative green">Centered</div>
+</div>
+```
+
+![centering-5](..\imgs\LCL-5\centering-5.png)
+
+负边距是如何工作的？
+
+>父元素的`position: relative`可以让它显式定位，但是由于没有指定偏移量，因此它的位置就像在正常流中。
+>
+>设置`position: absolute`在 dialog 上让它跳出文档流并且绝对定位。
+>
+>设置`top: 50%`和`left:50%`能让绝对定位的元素的偏移量是父元素高和宽的一半。
+>
+>这只会将对话框的左上角放在中心位置。要将对话框的中心移动到父容器的中心，设置负边距为对话框宽度/高度的一半。
+
+这个方法有什么缺点？
+
+> 需要指定宽度和高度，以便垂直和水平居中。
+>
+> 手动调整负边距会很痛苦，但是，这是基于`position:absolute`属性的技术中，唯一能在IE6中使用的。
+
+`flexbox based centering`：Flexbox 的居中技术是最不令人惊讶的技术，属性就如描述的那样工作。
+
